@@ -14,8 +14,8 @@ export async function signToken(payload: { id: number; email: string }) {
 export async function verifyToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, SECRET_KEY);
-    return payload;
-  } catch (error) {
+    return payload as { id: number; email: string };
+  } catch {
     return null;
   }
 }
