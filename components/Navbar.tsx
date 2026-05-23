@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { getUser } from '../lib/auth-util';
-import { logoutAction } from '../actions/auth';
 
 export default async function Navbar() {
   const user = await getUser();
@@ -23,11 +22,9 @@ export default async function Navbar() {
                 <Link href="/posts/new" className="bg-indigo-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-700">
                   New Post
                 </Link>
-                <form action={logoutAction}>
-                  <button type="submit" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                    Logout
-                  </button>
-                </form>
+                <Link href="/logout" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                  Logout
+                </Link>
               </>
             ) : (
               <>
