@@ -1,6 +1,9 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
+export const COOKIE_NAME = 'blog_session';
+export const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'super-secret-key-12345');
 
 export async function signToken(payload: { id: number; email: string }) {
@@ -22,7 +25,7 @@ export async function verifyToken(token: string) {
 
 export async function getUser() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value;
+  const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
   return await verifyToken(token);
 }

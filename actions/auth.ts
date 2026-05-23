@@ -9,6 +9,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { ActionState } from '../app/components/AuthForm';
+import { COOKIE_NAME, MAX_AGE } from '../lib/auth-util';
 
 export async function registerAction(state: ActionState, formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string;
@@ -25,7 +26,11 @@ export async function registerAction(state: ActionState, formData: FormData): Pr
 
     const token = await signToken({ id: newUser.id, email: newUser.email });
     const cookieStore = await cookies();
-    cookieStore.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    cookieStore.set(COOKIE_NAME, token, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: MAX_AGE
+    });
   } catch (err: unknown) {
     if (err instanceof Error) {
       return { error: err.message };
@@ -51,7 +56,11 @@ export async function loginAction(state: ActionState, formData: FormData): Promi
 
     const token = await signToken({ id: user.id, email: user.email });
     const cookieStore = await cookies();
-    cookieStore.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    cookieStore.set(COOKIE_NAME, token, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: MAX_AGE
+    });
   } catch (err: unknown) {
     if (err instanceof Error) {
       return { error: err.message };
@@ -64,6 +73,6 @@ export async function loginAction(state: ActionState, formData: FormData): Promi
 
 export async function logoutAction() {
   const cookieStore = await cookies();
-  cookieStore.delete('token');
+  cookieStore.delete(COOKIE_NAME);
   redirect('/');
 }
