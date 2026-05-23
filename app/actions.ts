@@ -1,17 +1,16 @@
 'use server';
 
 import { db } from '../db';
-import { users } from '../db/schema';
+import { users, posts } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
-import { signToken } from '../lib/auth-util';
+import { signToken, getUser, COOKIE_NAME, MAX_AGE } from '../lib/auth';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { ActionState } from './components/AuthForm';
+import { revalidatePath } from 'next/cache';
 
-import { ActionState } from '../app/components/AuthForm';
-import { COOKIE_NAME, MAX_AGE } from '../lib/auth-util';
-
-export async function registerAction(state: ActionState, formData: FormData): Promise<ActionState> {
+export async function register(state: ActionState, formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
@@ -41,7 +40,7 @@ export async function registerAction(state: ActionState, formData: FormData): Pr
   redirect('/');
 }
 
-export async function loginAction(state: ActionState, formData: FormData): Promise<ActionState> {
+export async function login(state: ActionState, formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   
@@ -71,8 +70,46 @@ export async function loginAction(state: ActionState, formData: FormData): Promi
   redirect('/');
 }
 
-export async function logoutAction() {
+export async function logout() {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
+  redirect('/');
+}
+
+export async function createPostAction(formData: FormData) {
+  const user = await getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const title = formData.get('title') as string;
+  const content = formData.get('content') as string;
+  const tagsStr = formData.get('tags') as string;
+  const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()) : [];
+
+  if (!title || !content) throw new Error('Missing fields');
+
+  await db.insert(posts).values({
+    title,
+    content,
+    tags,
+    ownerId: user.id as number
+  });
+
+  revalidatePath('/');
+  revalidatePath('/posts');
+  redirect('/');
+}
+
+export async function deletePostAction(id: number) {
+  const user = await getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const [post] = await db.select().from(posts).where(eq(posts.id, id));
+  if (!post) throw new Error('Post not found');
+  if (post.ownerId !== user.id) throw new Error('Unauthorized');
+
+  await db.delete(posts).where(eq(posts.id, id));
+
+  revalidatePath('/');
+  revalidatePath('/posts');
   redirect('/');
 }

@@ -1,5 +1,5 @@
-import { createPostAction } from '@/actions/posts';
-import { getUser } from '@/lib/auth-util';
+import { createPostAction } from '@/app/actions';
+import { getUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export default async function NewPost() {

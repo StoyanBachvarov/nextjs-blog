@@ -1,5 +1,5 @@
 'use client';
-import { deletePostAction } from '../actions/posts';
+import { deletePostAction } from '@/app/actions';
 
 export default function DeleteButton({ id }: { id: number }) {
   return (

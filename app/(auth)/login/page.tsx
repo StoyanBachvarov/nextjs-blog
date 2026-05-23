@@ -1,5 +1,5 @@
-import { loginAction } from '@/actions/auth';
-import { AuthForm } from '../components/AuthForm';
+import { login } from '@/app/actions';
+import { AuthForm } from '../../components/AuthForm';
 
 export default function Login() {
   return (
@@ -11,7 +11,7 @@ export default function Login() {
           </h2>
         </div>
         <AuthForm
-          action={loginAction}
+          action={login}
           buttonLabel="Sign in"
           footerText="Don't have an account?"
           footerLabel="Register"

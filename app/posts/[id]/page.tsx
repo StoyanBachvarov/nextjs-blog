@@ -1,9 +1,9 @@
-import { db } from '../../../db';
-import { posts, users } from '../../../db/schema';
+import { db } from '@/db';
+import { posts, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
-import DeleteButton from '../../../components/DeleteButton';
-import { getUser } from '../../../lib/auth-util';
+import DeleteButton from '@/app/components/DeletePostButton';
+import { getUser } from '@/lib/auth';
 import { Suspense } from 'react';
 import Loading from '../../loading';
 import Link from 'next/link';

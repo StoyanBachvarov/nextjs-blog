@@ -1,5 +1,5 @@
-import { registerAction } from '@/actions/auth';
-import { AuthForm } from '../components/AuthForm';
+import { register } from '@/app/actions';
+import { AuthForm } from '../../components/AuthForm';
 
 export default function Register() {
   return (
@@ -11,7 +11,7 @@ export default function Register() {
           </h2>
         </div>
         <AuthForm
-          action={registerAction}
+          action={register}
           buttonLabel="Sign up"
           footerText="Already have an account?"
           footerLabel="Log in"

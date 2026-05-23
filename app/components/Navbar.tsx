@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getUser } from '../lib/auth-util';
+import { getUser } from '@/lib/auth';
 
 export default async function Navbar() {
   const user = await getUser();

@@ -1,4 +1,4 @@
-import { logoutAction } from "@/actions/auth";
+import { logout } from "@/app/actions";
 
 export const dynamic = "force-static";
 
@@ -10,7 +10,7 @@ export default function LogoutPage() {
         <p className="mt-2 text-zinc-600">
           End your session on this browser.
         </p>
-        <form action={logoutAction} className="mt-8">
+        <form action={logout} className="mt-8">
           <button
             type="submit"
             className="rounded-lg bg-zinc-950 hover:bg-zinc-800 transition-colors px-5 py-3 font-semibold text-white w-full sm:w-auto"
