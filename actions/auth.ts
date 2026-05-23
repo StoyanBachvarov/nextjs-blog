@@ -8,40 +8,56 @@ import { signToken } from '../lib/auth-util';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-export async function registerAction(formData: FormData) {
+import { ActionState } from '../app/components/AuthForm';
+
+export async function registerAction(state: ActionState, formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  if (!email || !password) throw new Error('Missing fields');
+  if (!email || !password) return { error: 'Missing fields' };
 
-  const existing = await db.select().from(users).where(eq(users.email, email));
-  if (existing.length > 0) throw new Error('User exists');
+  try {
+    const existing = await db.select().from(users).where(eq(users.email, email));
+    if (existing.length > 0) return { error: 'User exists' };
 
-  const hash = await bcrypt.hash(password, 10);
-  const [newUser] = await db.insert(users).values({ email, passwordHash: hash }).returning();
+    const hash = await bcrypt.hash(password, 10);
+    const [newUser] = await db.insert(users).values({ email, passwordHash: hash }).returning();
 
-  const token = await signToken({ id: newUser.id, email: newUser.email });
-  const cookieStore = await cookies();
-  cookieStore.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    const token = await signToken({ id: newUser.id, email: newUser.email });
+    const cookieStore = await cookies();
+    cookieStore.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return { error: err.message };
+    }
+    return { error: 'Error occurred' };
+  }
 
   redirect('/');
 }
 
-export async function loginAction(formData: FormData) {
+export async function loginAction(state: ActionState, formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   
-  if (!email || !password) throw new Error('Missing fields');
+  if (!email || !password) return { error: 'Missing fields' };
   
-  const [user] = await db.select().from(users).where(eq(users.email, email));
-  if (!user) throw new Error('Invalid credentials');
+  try {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    if (!user) return { error: 'Invalid credentials' };
 
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) throw new Error('Invalid credentials');
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) return { error: 'Invalid credentials' };
 
-  const token = await signToken({ id: user.id, email: user.email });
-  const cookieStore = await cookies();
-  cookieStore.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    const token = await signToken({ id: user.id, email: user.email });
+    const cookieStore = await cookies();
+    cookieStore.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return { error: err.message };
+    }
+    return { error: 'Error occurred' };
+  }
 
   redirect('/');
 }
